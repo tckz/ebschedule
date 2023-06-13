@@ -22,6 +22,10 @@ TARGETS=\
 all: $(TARGETS)
 	@echo "$@ done." 1>&2
 
+test:
+	TZ=UTC $(GO_CMD) test -covermode atomic -cover ./...
+	@echo "$@ done." 1>&2
+
 .PHONY: lint
 lint: tools
 	$(TOOL_STATICCHECK) ./...

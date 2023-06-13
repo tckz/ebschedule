@@ -3,12 +3,68 @@ package ebschedule
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/service/scheduler"
+	"github.com/aws/aws-sdk-go-v2/service/scheduler/types"
 	"github.com/fatih/color"
 	"github.com/goccy/go-yaml"
+	"github.com/hexops/gotextdiff"
+	"github.com/hexops/gotextdiff/myers"
+	"github.com/hexops/gotextdiff/span"
+	"github.com/samber/lo"
+	"github.com/spf13/cobra"
 )
+
+func newDiffCommand(in *CommandInput) *cobra.Command {
+	return wrapCobra(&cobra.Command{
+		Use:   "diff",
+		Short: "Diff schedule configuration",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+			fn := cmd.Flag(OptSchedule).Value.String()
+
+			sch, err := prepareInputSchedule(fn)
+			if err != nil {
+				return fmt.Errorf("prepareInputSchedule: %w", err)
+			}
+
+			fromYAML := ""
+			fromName := "/dev/null"
+
+			curSch, err := in.SchedulerClient.GetSchedule(ctx, &scheduler.GetScheduleInput{
+				Name:      sch.Name,
+				GroupName: sch.GroupName,
+			})
+			if err != nil {
+				var notFound *types.ResourceNotFoundException
+				if !errors.As(err, &notFound) {
+					return fmt.Errorf("scheduler.GetSchedule: %w", err)
+				}
+			} else {
+				fromYAML, err = marshalYAMLForDiff(&curSch)
+				if err != nil {
+					return fmt.Errorf("marshalYAMLForDiff.currentSchedule: %w", err)
+				}
+				fromName = *curSch.Arn
+			}
+
+			toYAML, err := marshalYAMLForDiff(&sch)
+			if err != nil {
+				return fmt.Errorf("marshalYAMLForDiff.specifiedSchedule: %w", err)
+			}
+
+			edits := myers.ComputeEdits(span.URIFromPath(fromName), fromYAML, toYAML)
+			fmt.Fprint(in.OutWriter, coloredDiff(fmt.Sprint(gotextdiff.ToUnified(fromName, fn, fromYAML, edits))))
+			return nil
+		},
+	}, func(cmd *cobra.Command) {
+		cmd.Flags().String(OptSchedule, "", "path/to/schedule.yaml")
+		lo.Must0(cmd.MarkFlagRequired(OptSchedule))
+	})
+}
 
 func normalizeJSON(js []byte) ([]byte, error) {
 	var v any

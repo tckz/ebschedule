@@ -31,9 +31,10 @@ func run() error {
 		return fmt.Errorf("config.LoadDefaultConfig: %w", err)
 	}
 
-	return ebschedule.NewCommand(
-		myName, version,
-		scheduler.NewFromConfig(cfg),
-		os.Stdout,
-	).ExecuteContext(ctx)
+	return ebschedule.NewCommand(&ebschedule.CommandInput{
+		AppName:         myName,
+		Version:         version,
+		SchedulerClient: scheduler.NewFromConfig(cfg),
+		OutWriter:       os.Stdout,
+	}).ExecuteContext(ctx)
 }
