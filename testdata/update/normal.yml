@@ -1,0 +1,54 @@
+# based on `aws scheduler create-schedule --generate-cli-skeleton yaml-input`
+
+#EndDate: 1970-01-01 00:00:00 # The date, in UTC, before which the schedule can invoke its target.
+FlexibleTimeWindow: # [REQUIRED] Allows you to configure a time window during which EventBridge Scheduler invokes the schedule.
+  #MaximumWindowInMinutes: 0  # The maximum time window during which a schedule can be invoked.
+  Mode: OFF # [REQUIRED] Determines whether the schedule is invoked within a flexible time window. Valid values are: OFF, FLEXIBLE.
+GroupName: 'some-group' # The name of the schedule group to associate with this schedule.
+#KmsKeyArn: '' # The Amazon Resource Name (ARN) for the customer managed KMS key that EventBridge Scheduler will use to encrypt and decrypt your data.
+Name: 'some-schedule' # [REQUIRED] The name of the schedule that you are creating.
+# https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html
+ScheduleExpression: 'cron(*/3 * * * ? *)' # [REQUIRED]  The expression that defines when the schedule runs.
+ScheduleExpressionTimezone: 'Asia/Tokyo' # The timezone in which the scheduling expression is evaluated.
+#StartDate: 1970-01-01 00:00:00 # The date, in UTC, after which the schedule can begin invoking its target.
+State: ENABLED # Specifies whether the schedule is enabled or disabled. Valid values are: ENABLED, DISABLED.
+Target: # [REQUIRED] The schedule's target.
+  Arn: 'arn:aws:ecs:ap-northeast-1:99999:cluster/some-cluster'  # [REQUIRED] The Amazon Resource Name (ARN) of the target.
+  DeadLetterConfig: # An object that contains information about an Amazon SQS queue that EventBridge Scheduler uses as a dead-letter queue for your schedule.
+    Arn: 'arn:aws:sqs:ap-northeast-1:99999:some-dlq'  # The Amazon Resource Name (ARN) of the SQS queue specified as the destination for the dead-letter queue.
+  EcsParameters: # The templated target type for the Amazon ECS  RunTask  API operation.
+    #CapacityProviderStrategy:  # The capacity provider strategy to use for the task.
+    #- base: 0  # The base value designates how many tasks, at a minimum, to run on the specified capacity provider.
+    #  capacityProvider: '' # [REQUIRED] The short name of the capacity provider.
+    #  weight: 0 # The weight value designates the relative percentage of the total number of tasks launched that should use the specified capacity provider.
+    EnableECSManagedTags: true # Specifies whether to enable Amazon ECS managed tags for the task.
+    EnableExecuteCommand: false # Whether or not to enable the execute command functionality for the containers in this task.
+    #Group: '' # Specifies an ECS task group for the task.
+    LaunchType: FARGATE # Specifies the launch type on which your task is running. Valid values are: EC2, FARGATE, EXTERNAL.
+    NetworkConfiguration: # This structure specifies the network configuration for an ECS task.
+      awsvpcConfiguration:  # Specifies the Amazon VPC subnets and security groups for the task, and whether a public IP address is to be used.
+        AssignPublicIp: ENABLED  # Specifies whether the task's elastic network interface receives a public IP address. Valid values are: ENABLED, DISABLED.
+        SecurityGroups: # Specifies the security groups associated with the task.
+        - 'sg-xxxxx'
+        Subnets: # [REQUIRED] Specifies the subnets associated with the task.
+        - 'subnet-xxxxx'
+        - 'subnet-yyyyy'
+    #PlacementConstraints: # An array of placement constraint objects to use for the task.
+    #- expression: ''  # A cluster query language expression to apply to the constraint.
+    #  type: distinctInstance # The type of constraint. Valid values are: distinctInstance, memberOf.
+    #PlacementStrategy: # The task placement strategy for a task or service.
+    #- field: ''  # The field to apply the placement strategy against.
+    #  type: random # The type of placement strategy. Valid values are: random, spread, binpack.
+    #PlatformVersion: '' # Specifies the platform version for the task.
+    #PropagateTags: TASK_DEFINITION # Specifies whether to propagate the tags from the task definition to the task. Valid values are: TASK_DEFINITION.
+    #ReferenceId: '' # The reference ID to use for the task.
+    #Tags: # The metadata that you apply to the task to help you categorize and organize them.
+    #- KeyName: ''
+    TaskCount: 1 # The number of tasks to create based on TaskDefinition.
+    TaskDefinitionArn: 'arn:aws:ecs:ap-northeast-1:99999:task-definition/some-def' # [REQUIRED] The Amazon Resource Name (ARN) of the task definition to use if the event target is an Amazon ECS task.
+  Input: | # The text, or well-formed JSON, passed to the target.
+    {"containerOverrides":[{"name":"hello-task","command":["ya","yo"]}]}
+  RetryPolicy: # A RetryPolicy object that includes information about the retry policy settings, including the maximum age of an event, and the maximum number of times EventBridge Scheduler will try to deliver the event to a target.
+    MaximumEventAgeInSeconds: 600  # The maximum amount of time, in seconds, to continue to make retry attempts.
+    MaximumRetryAttempts: 2 # The maximum number of retry attempts to make before the request fails.
+  RoleArn: 'arn:aws:iam::99999:role/some-scheduler-role' # [REQUIRED] The Amazon Resource Name (ARN) of the IAM role that EventBridge Scheduler will use for this target when the schedule is invoked.
