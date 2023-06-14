@@ -56,8 +56,10 @@ func newDiffCommand(in *CommandInput) *cobra.Command {
 				return fmt.Errorf("marshalYAMLForDiff.specifiedSchedule: %w", err)
 			}
 
-			edits := myers.ComputeEdits(span.URIFromPath(fromName), fromYAML, toYAML)
-			fmt.Fprint(in.OutWriter, coloredDiff(fmt.Sprint(gotextdiff.ToUnified(fromName, fn, fromYAML, edits))))
+			if diff := fmt.Sprint(gotextdiff.ToUnified(fromName, fn, fromYAML,
+				myers.ComputeEdits(span.URIFromPath(fromName), fromYAML, toYAML))); diff != "" {
+				fmt.Fprint(in.OutWriter, coloredDiff(diff))
+			}
 			return nil
 		},
 	}, func(cmd *cobra.Command) {
