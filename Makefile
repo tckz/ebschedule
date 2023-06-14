@@ -4,9 +4,6 @@ ifeq ($(GO_CMD),)
 GO_CMD=go
 endif
 
-VERSION=$(shell git describe --always --tags | sed -e 's/-/+/')
-GO_BUILD=CGO_ENABLED=0 $(GO_CMD) build -ldflags "-X main.version=$(VERSION)" -trimpath
-
 SRCS_OTHER=$(shell find . -type d -name vendor -prune -o -type d -name cmd -prune -o -type f -name "*.go" -print) go.mod
 
 DIR_BIN := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))/bin
@@ -32,9 +29,16 @@ lint: tools
 
 TOOL_STATICCHECK = $(DIR_BIN)/staticcheck
 TOOL_MOCKGEN = $(DIR_BIN)/mockgen
+TOOL_GORELEASER = $(DIR_BIN)/goreleaser
+
+ifeq ($(GORELEASER_CMD),)
+GORELEASER_CMD=$(TOOL_GORELEASER)
+BUILD_DEP=$(TOOL_GORELEASER)
+endif
 
 TOOLS = \
 	$(TOOL_MOCKGEN) \
+	$(TOOL_GORELEASER) \
 	$(TOOL_STATICCHECK)
 
 TOOLS_DEP = Makefile
@@ -47,6 +51,11 @@ $(TOOL_STATICCHECK): export GOBIN=$(DIR_BIN)
 $(TOOL_STATICCHECK): $(TOOLS_DEP)
 	@echo "### `basename $@` install destination=$(GOBIN)" 1>&2
 	CGO_ENABLED=0 $(GO_CMD) install honnef.co/go/tools/cmd/staticcheck@v0.4.3
+
+$(TOOL_GORELEASER): export GOBIN=$(DIR_BIN)
+$(TOOL_GORELEASER): $(TOOLS_DEP)
+	@echo "### `basename $@` install destination=$(GOBIN)" 1>&2
+	$(GO_CMD) install github.com/goreleaser/goreleaser@v1.18.2
 
 $(TOOL_MOCKGEN): export GOBIN=$(DIR_BIN)
 $(TOOL_MOCKGEN): $(TOOLS_DEP)
@@ -68,5 +77,5 @@ clean:
 	/bin/rm -f $(TARGETS)
 	@echo "$@ done." 1>&2
 
-$(DIST_EBSCHEDULE): cmd/ebschedule/* $(SRCS_OTHER)
-	$(GO_BUILD) -o $@  ./cmd/ebschedule/
+$(DIST_EBSCHEDULE): cmd/ebschedule/* $(SRCS_OTHER) $(BUILD_DEP)
+	$(GORELEASER_CMD) build --single-target --snapshot --clean -o $@
