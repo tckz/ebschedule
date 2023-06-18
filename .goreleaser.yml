@@ -31,3 +31,5 @@ changelog:
       - "^ci:"
       - "^docs:"
       - "^test:"
+      - "^chore:"
+
