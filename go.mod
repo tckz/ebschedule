@@ -3,7 +3,7 @@ module github.com/tckz/ebschedule
 go 1.20
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.18.0
+	github.com/aws/aws-sdk-go-v2 v1.18.1
 	github.com/aws/aws-sdk-go-v2/config v1.18.25
 	github.com/aws/aws-sdk-go-v2/service/scheduler v1.1.11
 	github.com/fatih/color v1.15.0
