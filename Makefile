@@ -23,10 +23,6 @@ test:
 	TZ=UTC $(GO_CMD) test -covermode atomic -cover ./...
 	@echo "$@ done." 1>&2
 
-.PHONY: lint
-lint: tools
-	$(TOOL_STATICCHECK) ./...
-
 TOOL_STATICCHECK = $(DIR_BIN)/staticcheck
 TOOL_MOCKGEN = $(DIR_BIN)/mockgen
 TOOL_GORELEASER = $(DIR_BIN)/goreleaser
@@ -51,6 +47,10 @@ $(TOOL_STATICCHECK): export GOBIN=$(DIR_BIN)
 $(TOOL_STATICCHECK): $(TOOLS_DEP)
 	@echo "### `basename $@` install destination=$(GOBIN)" 1>&2
 	CGO_ENABLED=0 $(GO_CMD) install honnef.co/go/tools/cmd/staticcheck@v0.4.3
+
+.PHONY: lint
+lint: $(TOOL_STATICCHECK)
+	$(TOOL_STATICCHECK) ./...
 
 $(TOOL_GORELEASER): export GOBIN=$(DIR_BIN)
 $(TOOL_GORELEASER): $(TOOLS_DEP)
