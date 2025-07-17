@@ -55,7 +55,7 @@ lint: $(TOOL_STATICCHECK)
 $(TOOL_GORELEASER): export GOBIN=$(DIR_BIN)
 $(TOOL_GORELEASER): $(TOOLS_DEP)
 	@echo "### `basename $@` install destination=$(GOBIN)" 1>&2
-	$(GO_CMD) install github.com/goreleaser/goreleaser@v1.18.2
+	$(GO_CMD) install github.com/goreleaser/goreleaser/v2@latest
 
 $(TOOL_MOCKGEN): export GOBIN=$(DIR_BIN)
 $(TOOL_MOCKGEN): $(TOOLS_DEP)
