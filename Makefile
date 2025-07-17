@@ -60,7 +60,7 @@ $(TOOL_GORELEASER): $(TOOLS_DEP)
 $(TOOL_MOCKGEN): export GOBIN=$(DIR_BIN)
 $(TOOL_MOCKGEN): $(TOOLS_DEP)
 	@echo "### `basename $@` install destination=$(GOBIN)" 1>&2
-	CGO_ENABLED=0 $(GO_CMD) install github.com/golang/mock/mockgen@v1.6.0
+	CGO_ENABLED=0 $(GO_CMD) install go.uber.org/mock/mockgen@v0.5.2
 
 .PHONY: gen
 TMP_PATH := $(DIR_BIN):$(PATH)

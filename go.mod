@@ -8,7 +8,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/scheduler v1.13.10
 	github.com/fatih/color v1.18.0
 	github.com/goccy/go-yaml v1.18.0
-	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.7.0
 	github.com/hexops/gotextdiff v1.0.3
 	github.com/kayac/go-config v0.7.0
@@ -16,6 +15,7 @@ require (
 	github.com/samber/lo v1.51.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
+	go.uber.org/mock v0.5.2
 )
 
 require (
